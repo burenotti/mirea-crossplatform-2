@@ -1,3 +1,6 @@
+# Report PDF Output
+report/output/*.pdf
+
 # Miscellaneous
 *.class
 *.log
