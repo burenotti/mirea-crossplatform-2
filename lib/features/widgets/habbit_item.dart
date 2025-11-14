@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:practice2/features/entities/habbit.dart';
 import 'package:practice2/features/widgets/habbits_controller.dart';
 
@@ -7,21 +8,6 @@ class HabbitItem extends StatelessWidget {
   final HabbitsController controller;
 
   const HabbitItem({super.key, required this.habbit, required this.controller});
-
-  IconData _getIconData(HabbitIcon icon) {
-    switch (icon) {
-      case HabbitIcon.smoking:
-        return Icons.smoking_rooms;
-      case HabbitIcon.running:
-        return Icons.directions_run;
-      case HabbitIcon.reading:
-        return Icons.menu_book;
-      case HabbitIcon.water:
-        return Icons.water_drop;
-      case HabbitIcon.sport:
-        return Icons.fitness_center;
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,15 +23,25 @@ class HabbitItem extends StatelessWidget {
             children: [
               // Иконка привычки
               Container(
+                width: 56,
+                height: 56,
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.primaryContainer,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(
-                  _getIconData(habbit.icon),
-                  size: 32,
-                  color: Theme.of(context).colorScheme.primary,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: CachedNetworkImage(
+                    imageUrl: habbit.iconUrl,
+                    fit: BoxFit.cover,
+                    placeholder: (context, url) =>
+                        const Center(child: CircularProgressIndicator()),
+                    errorWidget: (context, url, error) => Icon(
+                      Icons.error,
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(width: 16),
@@ -56,11 +52,15 @@ class HabbitItem extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        Text(
-                          habbit.name,
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
+                        Expanded(
+                          child: Text(
+                            habbit.name,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
                           ),
                         ),
                         // Кнопка редактирования слева
@@ -77,16 +77,19 @@ class HabbitItem extends StatelessWidget {
                     Text(
                       'Цель: ${habbit.targetDays} дней',
                       style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                      overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 4),
                     Text(
                       'Прогресс: ${habbit.currentProgress} / ${habbit.targetDays}',
                       style: const TextStyle(fontSize: 14),
+                      overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 4),
                     Text(
                       'Срывов: ${habbit.currentBreaks}',
                       style: TextStyle(fontSize: 14, color: Colors.red[700]),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),

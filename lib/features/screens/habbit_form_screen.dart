@@ -19,26 +19,19 @@ class HabbitFormScreen extends StatefulWidget {
 class _HabbitFormScreenState extends State<HabbitFormScreen> {
   final _nameController = TextEditingController();
   final _targetDaysController = TextEditingController();
-  final Map<IconData, HabbitIcon> _icons = {
-    Icons.run_circle: HabbitIcon.running,
-    Icons.menu_book_sharp: HabbitIcon.reading,
-    Icons.smoke_free: HabbitIcon.smoking,
-    Icons.sports_basketball: HabbitIcon.sport,
-    Icons.local_drink: HabbitIcon.water,
-  };
-
-  HabbitIcon? _selectedIcon;
+  final _iconUrlController = TextEditingController();
 
   @override
   void dispose() {
     _nameController.dispose();
     _targetDaysController.dispose();
+    _iconUrlController.dispose();
     super.dispose();
   }
 
   bool get _isFormValid {
     return _nameController.text.isNotEmpty &&
-        _selectedIcon != null &&
+        _iconUrlController.text.isNotEmpty &&
         _targetDaysController.text.isNotEmpty &&
         int.tryParse(_targetDaysController.text) != null &&
         int.parse(_targetDaysController.text) > 0;
@@ -48,9 +41,18 @@ class _HabbitFormScreenState extends State<HabbitFormScreen> {
   void initState() {
     super.initState();
     _nameController.text = widget.editingHabbit?.name ?? "";
-    _selectedIcon = widget.editingHabbit?.icon;
+    _iconUrlController.text = widget.editingHabbit?.iconUrl ?? "";
     _targetDaysController.text =
         widget.editingHabbit?.targetDays.toString() ?? "";
+
+    // Добавляем слушателей для обновления состояния кнопки
+    _nameController.addListener(_updateFormState);
+    _iconUrlController.addListener(_updateFormState);
+    _targetDaysController.addListener(_updateFormState);
+  }
+
+  void _updateFormState() {
+    setState(() {});
   }
 
   void _submitForm() {
@@ -58,14 +60,14 @@ class _HabbitFormScreenState extends State<HabbitFormScreen> {
       if (widget.editingHabbit == null) {
         widget.habbits.addHabbit(
           name: _nameController.text,
-          icon: _selectedIcon!,
+          iconUrl: _iconUrlController.text,
           targetDays: int.parse(_targetDaysController.text),
         );
       } else {
         widget.habbits.editHabbit(
           habbitId: widget.editingHabbit!.id,
           name: _nameController.text,
-          icon: _selectedIcon!,
+          iconUrl: _iconUrlController.text,
           targetDays: int.parse(_targetDaysController.text),
         );
       }
@@ -103,57 +105,17 @@ class _HabbitFormScreenState extends State<HabbitFormScreen> {
                 hintText: 'Например: Пробежка',
                 border: OutlineInputBorder(),
               ),
-              onChanged: (_) => setState(() {}),
             ),
             const SizedBox(height: 24),
 
-            // Выбор иконки
-            const Text(
-              'Выберите иконку:',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-            ),
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 12,
-              runSpacing: 12,
-              children: _icons.entries.map((entry) {
-                final iconData = entry.key;
-                final habbitIcon = entry.value;
-                final isSelected = _selectedIcon == habbitIcon;
-
-                return GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _selectedIcon = habbitIcon;
-                    });
-                  },
-                  child: Container(
-                    width: 60,
-                    height: 60,
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? Theme.of(context).colorScheme.primaryContainer
-                          : Theme.of(
-                              context,
-                            ).colorScheme.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: isSelected
-                            ? Theme.of(context).colorScheme.primary
-                            : Colors.transparent,
-                        width: 2,
-                      ),
-                    ),
-                    child: Icon(
-                      iconData,
-                      size: 32,
-                      color: isSelected
-                          ? Theme.of(context).colorScheme.onPrimaryContainer
-                          : Theme.of(context).colorScheme.onSurface,
-                    ),
-                  ),
-                );
-              }).toList(),
+            // URL иконки
+            TextField(
+              controller: _iconUrlController,
+              decoration: const InputDecoration(
+                labelText: 'URL иконки',
+                hintText: 'Например: https://example.com/icon.png',
+                border: OutlineInputBorder(),
+              ),
             ),
             const SizedBox(height: 24),
 
@@ -167,7 +129,6 @@ class _HabbitFormScreenState extends State<HabbitFormScreen> {
                 border: OutlineInputBorder(),
                 suffixText: 'дней',
               ),
-              onChanged: null,
             ),
           ],
         ),

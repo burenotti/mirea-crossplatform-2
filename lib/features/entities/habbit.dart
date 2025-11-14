@@ -1,6 +1,3 @@
-/// Тип иконки для привычки
-enum HabbitIcon { smoking, running, reading, water, sport }
-
 class HabbitAction {
   final DateTime occuredOn;
 
@@ -18,7 +15,7 @@ class Break extends HabbitAction {
 class Habbit {
   final int id;
   final String name;
-  final HabbitIcon icon;
+  final String iconUrl;
   final DateTime createdAt;
   final int targetDays;
   final List<HabbitAction> _events;
@@ -26,14 +23,14 @@ class Habbit {
   factory Habbit({
     required int id,
     required String name,
-    required HabbitIcon icon,
+    required String iconUrl,
     required DateTime createdAt,
     required int targetDays,
   }) {
     return Habbit._(
       id: id,
       name: name,
-      icon: icon,
+      iconUrl: iconUrl,
       createdAt: createdAt,
       targetDays: targetDays,
       events: const [],
@@ -43,7 +40,7 @@ class Habbit {
   const Habbit._({
     required this.id,
     required this.name,
-    required this.icon,
+    required this.iconUrl,
     required this.createdAt,
     required this.targetDays,
     required List<HabbitAction> events,
@@ -57,13 +54,13 @@ class Habbit {
     return _copyWith(targetDays: targetDays);
   }
 
-  Habbit withIcon(HabbitIcon icon) {
-    return _copyWith(icon: icon);
+  Habbit withIconUrl(String iconUrl) {
+    return _copyWith(iconUrl: iconUrl);
   }
 
   Habbit _copyWith({
     String? name,
-    HabbitIcon? icon,
+    String? iconUrl,
     DateTime? createdAt,
     int? targetDays,
     List<HabbitAction>? events,
@@ -71,7 +68,7 @@ class Habbit {
     return Habbit._(
       id: id,
       name: name ?? this.name,
-      icon: icon ?? this.icon,
+      iconUrl: iconUrl ?? this.iconUrl,
       createdAt: createdAt ?? this.createdAt,
       targetDays: targetDays ?? this.targetDays,
       events: events ?? _events,

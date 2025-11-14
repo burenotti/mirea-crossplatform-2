@@ -6,7 +6,7 @@ abstract interface class HabbitsController {
   void removeHabbit({required int habbitId});
   void addHabbit({
     required String name,
-    required HabbitIcon icon,
+    required String iconUrl,
     required int targetDays,
   });
   List<Habbit> get habbits;
@@ -16,7 +16,7 @@ abstract interface class HabbitsController {
   void editHabbit({
     required int habbitId,
     required String name,
-    required HabbitIcon icon,
+    required String iconUrl,
     required int targetDays,
   });
 }

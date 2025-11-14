@@ -31,7 +31,7 @@ class _HabbitsContainerState extends State<HabbitsContainer>
   @override
   void addHabbit({
     required String name,
-    required HabbitIcon icon,
+    required String iconUrl,
     required int targetDays,
   }) {
     setState(() {
@@ -40,7 +40,7 @@ class _HabbitsContainerState extends State<HabbitsContainer>
           id: widget.nextHabbitId(),
           name: name,
           createdAt: widget.currentDateTime(),
-          icon: icon,
+          iconUrl: iconUrl,
           targetDays: targetDays,
         ),
       );
@@ -126,13 +126,13 @@ class _HabbitsContainerState extends State<HabbitsContainer>
   void editHabbit({
     required int habbitId,
     required String name,
-    required HabbitIcon icon,
+    required String iconUrl,
     required int targetDays,
   }) {
     _exchange(
       habbitId: habbitId,
       mutation: (h) =>
-          h.withName(name).withTargetDays(targetDays).withIcon(icon),
+          h.withName(name).withTargetDays(targetDays).withIconUrl(iconUrl),
     );
   }
 }
