@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:practice2/features/entities/habbit.dart';
+import 'package:practice2/features/screens/habbits_list_screen.dart';
 import 'package:practice2/features/widgets/habbits_controller.dart';
 
 class HabbitFormScreen extends StatefulWidget {
   final HabbitsController habbits;
-  final Habbit? editingHabbit;
+  final int? editingHabbitId;
 
   const HabbitFormScreen({
     super.key,
     required this.habbits,
-    required this.editingHabbit,
+    required this.editingHabbitId,
   });
 
   @override
@@ -40,16 +41,18 @@ class _HabbitFormScreenState extends State<HabbitFormScreen> {
   @override
   void initState() {
     super.initState();
-    _nameController.text = widget.editingHabbit?.name ?? "";
-    _iconUrlController.text = widget.editingHabbit?.iconUrl ?? "";
-    _targetDaysController.text =
-        widget.editingHabbit?.targetDays.toString() ?? "";
+    _nameController.text = _editingHabbit?.name ?? "";
+    _iconUrlController.text = _editingHabbit?.iconUrl ?? "";
+    _targetDaysController.text = _editingHabbit?.targetDays.toString() ?? "";
 
-    // Добавляем слушателей для обновления состояния кнопки
     _nameController.addListener(_updateFormState);
     _iconUrlController.addListener(_updateFormState);
     _targetDaysController.addListener(_updateFormState);
   }
+
+  Habbit? get _editingHabbit => widget.editingHabbitId == null
+      ? null
+      : widget.habbits.getHabbit(habbitId: widget.editingHabbitId!);
 
   void _updateFormState() {
     setState(() {});
@@ -57,7 +60,7 @@ class _HabbitFormScreenState extends State<HabbitFormScreen> {
 
   void _submitForm() {
     if (_isFormValid) {
-      if (widget.editingHabbit == null) {
+      if (_editingHabbit == null) {
         widget.habbits.addHabbit(
           name: _nameController.text,
           iconUrl: _iconUrlController.text,
@@ -65,13 +68,18 @@ class _HabbitFormScreenState extends State<HabbitFormScreen> {
         );
       } else {
         widget.habbits.editHabbit(
-          habbitId: widget.editingHabbit!.id,
+          habbitId: _editingHabbit!.id,
           name: _nameController.text,
           iconUrl: _iconUrlController.text,
           targetDays: int.parse(_targetDaysController.text),
         );
       }
-      widget.habbits.showHabbitsListScreen();
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => HabbitsListScreen(controller: widget.habbits),
+        ),
+      );
     }
   }
 
@@ -82,7 +90,7 @@ class _HabbitFormScreenState extends State<HabbitFormScreen> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text("Добавление привычки"),
         leading: IconButton(
-          onPressed: () => widget.habbits.showHabbitsListScreen(),
+          onPressed: () => Navigator.pop(context),
           icon: const Icon(Icons.arrow_back),
         ),
         actions: [

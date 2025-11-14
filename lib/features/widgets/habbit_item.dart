@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:practice2/features/entities/habbit.dart';
+import 'package:practice2/features/screens/habbit_form_screen.dart';
+import 'package:practice2/features/screens/habbit_stats_screen.dart';
 import 'package:practice2/features/widgets/habbits_controller.dart';
 
 class HabbitItem extends StatelessWidget {
@@ -14,9 +16,13 @@ class HabbitItem extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: InkWell(
-        onTap: () {
-          controller.showHabbitStatsScreen(habbitId: habbit.id);
-        },
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) =>
+                HabbitStatsScreen(habbitId: habbit.id, controller: controller),
+          ),
+        ),
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: Row(
@@ -66,9 +72,15 @@ class HabbitItem extends StatelessWidget {
                         // Кнопка редактирования слева
                         IconButton(
                           icon: const Icon(Icons.edit, size: 18),
-                          onPressed: () {
-                            controller.showHabbitFormScreen(habbit: habbit);
-                          },
+                          onPressed: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => HabbitFormScreen(
+                                habbits: controller,
+                                editingHabbitId: habbit.id,
+                              ),
+                            ),
+                          ),
                           tooltip: 'Редактировать',
                         ),
                       ],

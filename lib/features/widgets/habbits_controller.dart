@@ -10,13 +10,11 @@ abstract interface class HabbitsController {
     required int targetDays,
   });
   List<Habbit> get habbits;
-  void showHabbitFormScreen({Habbit? habbit});
-  void showHabbitsListScreen();
-  void showHabbitStatsScreen({required int habbitId});
   void editHabbit({
     required int habbitId,
     required String name,
     required String iconUrl,
     required int targetDays,
   });
+  Habbit getHabbit({required int habbitId});
 }
