@@ -135,10 +135,19 @@ static Future<T?> pushReplacement<T extends Object?, TO extends Object?>(
 Реализация вертикальной страничной навигации в файле habbit_item.dart показана в #r(<lst-push-impl>). Демонстрация навигации — на #r(<img-list-before>) и #r(<img-stats-after>).
 
 #listing(
-  file: "../lib/features/widgets/habbit_item.dart",
-  caption: [Реализация вертикального страничного перехода на экран статистики],
-  from: 19,
-  to: 25,
+  body: raw(
+    lang: "dart",
+    "
+onTap: () => Navigator.push(
+  context,
+  MaterialPageRoute(
+    builder: (_) =>
+        HabbitStatsScreen(habbitId: habbit.id, controller: controller),
+  ),
+),
+    "
+  ),
+  caption: [Реализация вертикального страничного перехода на экран статистики с помощью метода push],
 ) <lst-push-impl>
 
 #picture(
@@ -156,10 +165,16 @@ static Future<T?> pushReplacement<T extends Object?, TO extends Object?>(
 Пользователь может вернуться, нажав на стрелку «Назад» в AppBar. Вертикальная навигация назад реализована при переходе от экрана редактирования привычки обратно к списку привычек при помощи метода Navigator.pop(). На экране редактирования привычки c помощью кнопки в виде иконки стрелки влево, расположенной в левом верхнем углу. Реализация возврата в файле habbit_form_screen.dart показана в #r(<lst-pop-impl>). Демонстрация навигации — на #r(<img-stats>) и #r(<img-list-after-pop>).
 
 #listing(
-  file: "../lib/features/screens/habbit_stats_screen.dart",
-  caption: [Реализация метода pop() на экране редактирования привычки],
-  from: 24,
-  to: 30,
+  body: raw(
+    lang: "dart",
+    "
+leading: IconButton(
+  icon: const Icon(Icons.arrow_back),
+  onPressed: () => Navigator.pop(context),
+),
+    "
+  ),
+  caption: [Реализация метода pop() для возврата на предыдущий экран],
 ) <lst-pop-impl>
 
 #picture(
@@ -181,10 +196,36 @@ static Future<T?> pushReplacement<T extends Object?, TO extends Object?>(
 Реализация показана в #r(<lst-pushreplacement-impl>). Демонстрация — на #r(<img-form-filled>) и #r(<img-list-after-save>). Ключевая особенность перехода — отсутствие возможности вернуться на предыдущий экран (экран редактирования) по системной кнопке «Назад», так как он заменён.
 
 #listing(
-  file: "../lib/features/screens/habbit_form_screen.dart",
+  body: raw(
+    lang: "dart",
+    "
+void _submitForm() {
+  if (_isFormValid) {
+    if (_editingHabbit == null) {
+      widget.habbits.addHabbit(
+        name: _nameController.text,
+        iconUrl: _iconUrlController.text,
+        targetDays: int.parse(_targetDaysController.text),
+      );
+    } else {
+      widget.habbits.editHabbit(
+        habbitId: _editingHabbit!.id,
+        name: _nameController.text,
+        iconUrl: _iconUrlController.text,
+        targetDays: int.parse(_targetDaysController.text),
+      );
+    }
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => HabbitsListScreen(controller: widget.habbits),
+      ),
+    );
+  }
+}
+    "
+  ),
   caption: [Реализация горизонтальной страничной навигации с помощью метода pushReplacement],
-  from: 60,
-  to: 83,
 ) <lst-pushreplacement-impl>
 
 #picture(
