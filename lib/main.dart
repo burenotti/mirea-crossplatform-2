@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:practice2/features/screens/habbits_list_screen.dart';
 import 'package:practice2/features/state/habbits_container.dart';
 import 'package:practice2/features/widgets/habbits_controller.dart';
+import 'package:practice2/router_config.dart';
 
 void main() {
   var container = HabbitsContainer(
@@ -24,13 +24,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'Flutter Demo',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
       debugShowCheckedModeBanner: false,
-      home: HabbitsListScreen(controller: controller),
+      routerConfig: buildRouter(controller),
     );
   }
 }

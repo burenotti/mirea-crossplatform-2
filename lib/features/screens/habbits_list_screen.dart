@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:practice2/features/screens/habbit_form_screen.dart';
+import 'package:go_router/go_router.dart';
 import 'package:practice2/features/widgets/habbits_controller.dart';
 import 'package:practice2/features/widgets/habbits_list.dart';
+import 'package:practice2/router_config.dart';
 
 class HabbitsListScreen extends StatelessWidget {
   final HabbitsController controller;
@@ -17,13 +18,7 @@ class HabbitsListScreen extends StatelessWidget {
       ),
       body: HabbitsList(controller: controller),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) =>
-                HabbitFormScreen(habbits: controller, editingHabbitId: null),
-          ),
-        ),
+        onPressed: () => context.pushNamed(Routes.habbitAdd),
         tooltip: 'Add habbit',
         child: const Icon(Icons.add),
       ),

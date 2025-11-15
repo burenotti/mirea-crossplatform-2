@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:practice2/features/entities/habbit.dart';
 import 'package:practice2/features/screens/habbits_list_screen.dart';
 import 'package:practice2/features/widgets/habbits_controller.dart';
+import 'package:practice2/router_config.dart';
 
 class HabbitFormScreen extends StatefulWidget {
   final HabbitsController habbits;
@@ -74,12 +76,7 @@ class _HabbitFormScreenState extends State<HabbitFormScreen> {
           targetDays: int.parse(_targetDaysController.text),
         );
       }
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => HabbitsListScreen(controller: widget.habbits),
-        ),
-      );
+      context.goNamed(Routes.habbitsList);
     }
   }
 
@@ -90,7 +87,7 @@ class _HabbitFormScreenState extends State<HabbitFormScreen> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text("Добавление привычки"),
         leading: IconButton(
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => context.pop(),
           icon: const Icon(Icons.arrow_back),
         ),
         actions: [

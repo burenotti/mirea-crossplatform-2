@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:go_router/go_router.dart';
 import 'package:practice2/features/entities/habbit.dart';
 import 'package:practice2/features/screens/habbit_form_screen.dart';
 import 'package:practice2/features/screens/habbit_stats_screen.dart';
 import 'package:practice2/features/widgets/habbits_controller.dart';
+import 'package:practice2/router_config.dart';
 
 class HabbitItem extends StatelessWidget {
   final Habbit habbit;
@@ -16,12 +18,9 @@ class HabbitItem extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: InkWell(
-        onTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) =>
-                HabbitStatsScreen(habbitId: habbit.id, controller: controller),
-          ),
+        onTap: () => context.pushNamed(
+          Routes.habbitStats,
+          pathParameters: {"id": habbit.id.toString()},
         ),
         child: Padding(
           padding: const EdgeInsets.all(12),
@@ -72,14 +71,9 @@ class HabbitItem extends StatelessWidget {
                         // Кнопка редактирования слева
                         IconButton(
                           icon: const Icon(Icons.edit, size: 18),
-                          onPressed: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => HabbitFormScreen(
-                                habbits: controller,
-                                editingHabbitId: habbit.id,
-                              ),
-                            ),
+                          onPressed: () => context.pushNamed(
+                            Routes.habbitEdit,
+                            pathParameters: {"id": habbit.id.toString()},
                           ),
                           tooltip: 'Редактировать',
                         ),

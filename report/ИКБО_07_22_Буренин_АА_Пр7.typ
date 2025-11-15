@@ -242,13 +242,243 @@ void _submitForm() {
 
 В результате проведённой работы была успешно реализована и протестирована система страничной навигации. Все виды навигационных переходов были тщательно протестированы в различных условиях и продемонстрировали стабильную работу. Результаты тестирования подтвердили, что разработанная система навигации обеспечивает высокую производительность, отзывчивость и соответствие ожиданиям пользователей.
 
+== Реализация маршрутизированной навигации в проекте
+
+Для реализации маршрутизированной навигации в проекте был использован пакет go_router версии 14.6.2 — актуальная стабильная версия на момент разработки, предоставляющая удобный и современный API для декларативного описания маршрутов. Выбор данной библиотеки обусловлен её надёжностью, совместимостью с последними обновлениями Flutter, а также активной поддержкой сообщества разработчиков.
+
+*Маршрутная карта*
+
+В данном приложении маршруты всех экранов определены в файле router_config.dart, который содержит основную карту навигации. В этом файле задаются пути ко всем основным разделам приложения и их взаимосвязи. Структура маршрутной карты показана в #r(<lst-router-map>).
+
+#listing(
+  body: raw(
+    lang: "dart",
+    "
+final class Routes {
+  static const habbitsList = 'habbitsList';
+  static const habbitAdd = 'habbitAdd';
+  static const habbitStats = 'habbitStats';
+  static const habbitEdit = 'habbitEdit';
+}
+
+GoRouter buildRouter(HabbitsController controller) {
+  return GoRouter(
+    initialLocation: '/',
+    routes: [
+      GoRoute(
+        path: '/',
+        redirect: (context, state) => '/habbits',
+      ),
+      GoRoute(
+        path: '/habbits',
+        name: Routes.habbitsList,
+        builder: (context, state) => HabbitsListScreen(controller: controller),
+        routes: [
+          GoRoute(
+            path: 'add',
+            name: Routes.habbitAdd,
+            builder: (context, state) =>
+                HabbitFormScreen(habbits: controller, editingHabbitId: null),
+          ),
+          GoRoute(
+            path: ':id/stats',
+            name: Routes.habbitStats,
+            builder: (context, state) => HabbitStatsScreen(
+              controller: controller,
+              habbitId: int.parse(state.pathParameters[\"id\"]!),
+            ),
+          ),
+          GoRoute(
+            path: ':id/edit',
+            name: Routes.habbitEdit,
+            builder: (context, state) => HabbitFormScreen(
+              habbits: controller,
+              editingHabbitId: int.parse(state.pathParameters[\"id\"]!),
+            ),
+          ),
+        ],
+      ),
+    ],
+  );
+}
+    "
+  ),
+  caption: [Маршрутная карта приложения в файле router_config.dart],
+) <lst-router-map>
+
+*Делегат навигации*
+
+После того как маршрутная карта создана, её необходимо подключить в приложение. Для этого используется специализированный конструктор виджета приложения — MaterialApp.router. В нем задаётся конфигурация навигации через параметр routerConfig, как показано в #r(<lst-material-app-router>).
+
+#listing(
+  body: raw(
+    lang: "dart",
+    "
+class MyApp extends StatelessWidget {
+  final HabbitsController controller;
+
+  const MyApp({super.key, required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp.router(
+      title: 'Flutter Demo',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+      ),
+      debugShowCheckedModeBanner: false,
+      routerConfig: buildRouter(controller),
+    );
+  }
+}
+    "
+  ),
+  caption: [Конфигурирование маршрутизированной навигации в приложении],
+) <lst-material-app-router>
+
+После того, как навигационная конфигурация в приложении добавлена, можно получить доступ к навигационному делегату в любом месте приложения, где есть доступ к контексту. При обращении к навигационному делегату можно использовать ранее рассмотренные методы push, pop и pushReplacement, однако теперь они в качестве аргументов будут принимать не страницу навигации, а маршрут до требуемой страницы.
+
+*Вертикальная маршрутизированная навигация*
+
+Вертикальная маршрутизированная навигация реализована с использованием декларативных маршрутов GoRouter. Такой подход обеспечивает сохранение стека экранов и позволяет пользователю возвращаться на предыдущие страницы при помощи метода context.pop().
+
+Реализация вертикального маршрутизированного перехода от списка привычек к экрану добавления привычки при помощи метода context.pushNamed() показана в #r(<lst-router-push>). Демонстрация навигации — на #r(<img-router-list-1>) и #r(<img-router-form-1>).
+
+#listing(
+  body: raw(
+    lang: "dart",
+    "
+floatingActionButton: FloatingActionButton(
+  onPressed: () => context.pushNamed(Routes.habbitAdd),
+  tooltip: 'Add Habbit',
+  child: const Icon(Icons.add),
+),
+    "
+  ),
+  caption: [Реализация вертикального маршрутизированного перехода на экран добавления привычки],
+) <lst-router-push>
+
+#picture(
+  path: img("habbit_list_initial"),
+  caption: [Экран списка привычек до выполнения вертикальной маршрутизированной навигации],
+  width: 30%,
+) <img-router-list-1>
+
+#picture(
+  path: img("navigation_push_replacement_demo_before"),
+  caption: [Экран добавления привычки после выполнения вертикальной маршрутизированной навигации],
+  width: 30%,
+) <img-router-form-1>
+
+Реализация вертикального маршрутизированного перехода к экрану статистики привычки с передачей параметра ID показана в #r(<lst-router-push-params>). Демонстрация навигации — на #r(<img-router-list-2>) и #r(<img-router-stats>).
+
+#listing(
+  body: raw(
+    lang: "dart",
+    "
+onTap: () => context.pushNamed(
+  Routes.habbitStats,
+  pathParameters: {'id': habbit.id.toString()},
+),
+    "
+  ),
+  caption: [Реализация вертикального маршрутизированного перехода с передачей параметров],
+) <lst-router-push-params>
+
+#picture(
+  path: img("habbit_list_initial"),
+  caption: [Экран списка привычек до выполнения вертикальной маршрутизированной навигации на экран статистики],
+  width: 30%,
+) <img-router-list-2>
+
+#picture(
+  path: img("habbit_stats_screen"),
+  caption: [Экран статистики привычки после выполнения вертикальной маршрутизированной навигации],
+  width: 30%,
+) <img-router-stats>
+
+Реализация вертикального маршрутизированного перехода назад осуществляется с помощью метода context.pop(), показанного в #r(<lst-router-pop>). Демонстрация навигации — на #r(<img-router-stats-before-pop>) и #r(<img-router-list-after-pop>).
+
+#listing(
+  body: raw(
+    lang: "dart",
+    "
+leading: IconButton(
+  icon: const Icon(Icons.arrow_back),
+  onPressed: () => context.pop(),
+),
+    "
+  ),
+  caption: [Реализация метода context.pop() для возврата на предыдущий экран],
+) <lst-router-pop>
+
+#picture(
+  path: img("habbit_stats_screen"),
+  caption: [Экран статистики до нажатия кнопки возврата],
+  width: 30%,
+) <img-router-stats-before-pop>
+
+#picture(
+  path: img("habbit_list_after_add"),
+  caption: [Экран списка привычек после выполнения маршрутизированного возврата],
+  width: 30%,
+) <img-router-list-after-pop>
+
+*Горизонтальная маршрутизированная навигация*
+
+Горизонтальная маршрутизированная навигация реализована с использованием метода context.goNamed(). В приложении данный механизм применяется на экране редактирования/добавления привычки: после нажатия кнопки «Готово» выполняется переход с полной заменой навигационного стека на главный экран со списком привычек.
+
+Реализация показана в #r(<lst-router-go>). Демонстрация — на #r(<img-router-form-filled>) и #r(<img-router-list-after-save>). Основная особенность такого перехода заключается в том, что после его выполнения пользователь не может вернуться на предыдущий экран, поскольку навигационный стек полностью обновляется.
+
+#listing(
+  body: raw(
+    lang: "dart",
+    "
+void _submitForm() {
+  if (_isFormValid) {
+    if (_editingHabbit == null) {
+      widget.habbits.addHabbit(
+        name: _nameController.text,
+        iconUrl: _iconUrlController.text,
+        targetDays: int.parse(_targetDaysController.text),
+      );
+    } else {
+      widget.habbits.editHabbit(
+        habbitId: _editingHabbit!.id,
+        name: _nameController.text,
+        iconUrl: _iconUrlController.text,
+        targetDays: int.parse(_targetDaysController.text),
+      );
+    }
+    context.goNamed(Routes.habbitsList);
+  }
+}
+    "
+  ),
+  caption: [Реализация горизонтальной маршрутизированной навигации с помощью метода goNamed],
+) <lst-router-go>
+
+#picture(
+  path: img("navigation_push_replacement_demo_before"),
+  caption: [Экран редактирования привычки до нажатия кнопки «Готово»],
+  width: 30%,
+) <img-router-form-filled>
+
+#picture(
+  path: img("navigation_push_replacement_demo_after"),
+  caption: [Экран списка привычек после выполнения горизонтальной маршрутизированной навигации с заменой стека],
+  width: 30%,
+) <img-router-list-after-save>
+
+В результате проведённой работы была успешно реализована и протестирована комплексная система навигации, включающая как страничную, так и маршрутизированную навигацию. Все виды навигационных переходов были тщательно протестированы в различных условиях и продемонстрировали стабильную работу. Использование GoRouter позволило значительно упростить навигационную структуру, сделать код более читаемым и поддерживаемым. Результаты тестирования подтвердили, что разработанная система навигации обеспечивает высокую производительность, отзывчивость и соответствие ожиданиям пользователей.
+
 = Вывод
 
-В ходе выполнения практической работы была разработана и внедрена система страничной навигации для мобильного приложения трекинга привычек с использованием Navigation 1.0.
+В ходе выполнения практической работы была разработана и внедрена комплексная система навигации для мобильного приложения трекинга привычек, включающая как страничную навигацию с использованием Navigation 1.0, так и маршрутизированную навигацию на основе пакета go_router.
 
-В процессе работы были реализованы основные виды навигационных переходов — вертикальные (push/pop) и горизонтальные (pushReplacement). Проведено тестирование переходов между всеми экранами приложения: списком привычек, экраном редактирования привычки и экраном статистики.
+В процессе работы были реализованы основные виды навигационных переходов — вертикальные (push/pop, context.pushNamed/context.pop) и горизонтальные (pushReplacement, context.goNamed). Проведено тестирование переходов между всеми экранами приложения: списком привычек, экраном добавления/редактирования привычки и экраном статистики.
 
-Система навигации продемонстрировала высокую стабильность, отзывчивость и удобство для пользователя, что соответствует требованиям к современным мобильным приложениям.
+Использование go_router позволило значительно упростить навигационную структуру, сделать код более читаемым и поддерживаемым, а также обеспечить корректную работу с URL-адресами и глубокими ссылками. Система навигации продемонстрировала высокую стабильность, отзывчивость и удобство для пользователя, что соответствует требованиям к современным мобильным приложениям.
 
 Все изменения, выполненные в результате данной практической работы, были сохранены в удаленном репозитории GitHub:
 

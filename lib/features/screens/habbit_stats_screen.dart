@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:practice2/features/entities/habbit.dart';
 import 'package:practice2/features/widgets/habbits_controller.dart';
 
@@ -25,7 +26,7 @@ class HabbitStatsScreen extends StatelessWidget {
         title: const Text('Статистика привычки'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => context.pop(),
         ),
       ),
       body: Padding(
