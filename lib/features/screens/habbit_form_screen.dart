@@ -1,19 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:practice2/features/entities/habbit.dart';
-import 'package:practice2/features/screens/habbits_list_screen.dart';
-import 'package:practice2/features/widgets/habbits_controller.dart';
+import 'package:practice2/features/widgets/habbits_provider.dart';
 import 'package:practice2/router_config.dart';
 
 class HabbitFormScreen extends StatefulWidget {
-  final HabbitsController habbits;
   final int? editingHabbitId;
 
-  const HabbitFormScreen({
-    super.key,
-    required this.habbits,
-    required this.editingHabbitId,
-  });
+  const HabbitFormScreen({super.key, required this.editingHabbitId});
 
   @override
   State<HabbitFormScreen> createState() => _HabbitFormScreenState();
@@ -23,6 +17,7 @@ class _HabbitFormScreenState extends State<HabbitFormScreen> {
   final _nameController = TextEditingController();
   final _targetDaysController = TextEditingController();
   final _iconUrlController = TextEditingController();
+  bool _isInitialized = false;
 
   @override
   void dispose() {
@@ -43,18 +38,26 @@ class _HabbitFormScreenState extends State<HabbitFormScreen> {
   @override
   void initState() {
     super.initState();
-    _nameController.text = _editingHabbit?.name ?? "";
-    _iconUrlController.text = _editingHabbit?.iconUrl ?? "";
-    _targetDaysController.text = _editingHabbit?.targetDays.toString() ?? "";
-
     _nameController.addListener(_updateFormState);
     _iconUrlController.addListener(_updateFormState);
     _targetDaysController.addListener(_updateFormState);
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_isInitialized) {
+      _isInitialized = true;
+      final editingHabbit = _editingHabbit;
+      _nameController.text = editingHabbit?.name ?? "";
+      _iconUrlController.text = editingHabbit?.iconUrl ?? "";
+      _targetDaysController.text = editingHabbit?.targetDays.toString() ?? "";
+    }
+  }
+
   Habbit? get _editingHabbit => widget.editingHabbitId == null
       ? null
-      : widget.habbits.getHabbit(habbitId: widget.editingHabbitId!);
+      : context.habbitsController.getHabbit(habbitId: widget.editingHabbitId!);
 
   void _updateFormState() {
     setState(() {});
@@ -63,13 +66,13 @@ class _HabbitFormScreenState extends State<HabbitFormScreen> {
   void _submitForm() {
     if (_isFormValid) {
       if (_editingHabbit == null) {
-        widget.habbits.addHabbit(
+        context.habbitsController.addHabbit(
           name: _nameController.text,
           iconUrl: _iconUrlController.text,
           targetDays: int.parse(_targetDaysController.text),
         );
       } else {
-        widget.habbits.editHabbit(
+        context.habbitsController.editHabbit(
           habbitId: _editingHabbit!.id,
           name: _nameController.text,
           iconUrl: _iconUrlController.text,

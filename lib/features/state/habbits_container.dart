@@ -1,7 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:practice2/features/entities/habbit.dart';
 import 'package:practice2/features/widgets/habbits_controller.dart';
 
-class HabbitsContainer implements HabbitsController {
+class HabbitsContainer extends ChangeNotifier implements HabbitsController {
   List<Habbit> _habbits = [];
   final DateTime Function() currentDateTime;
   final int Function() nextHabbitId;
@@ -23,6 +24,7 @@ class HabbitsContainer implements HabbitsController {
         targetDays: targetDays,
       ),
     );
+    notifyListeners();
   }
 
   @override
@@ -44,6 +46,7 @@ class HabbitsContainer implements HabbitsController {
   @override
   void removeHabbit({required int habbitId}) {
     _habbits = _habbits.where((h) => h.id != habbitId).toList();
+    notifyListeners();
   }
 
   void _exchange({
@@ -52,6 +55,7 @@ class HabbitsContainer implements HabbitsController {
   }) {
     var index = _habbits.indexWhere((h) => h.id == habbitId);
     _habbits[index] = mutation(_habbits[index]);
+    notifyListeners();
   }
 
   @override

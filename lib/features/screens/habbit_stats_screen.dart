@@ -1,26 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:practice2/features/entities/habbit.dart';
-import 'package:practice2/features/widgets/habbits_controller.dart';
+import 'package:practice2/features/widgets/habbits_provider.dart';
 
 class HabbitStatsScreen extends StatelessWidget {
   final int habbitId;
-  final HabbitsController controller;
 
-  const HabbitStatsScreen({
-    super.key,
-    required this.habbitId,
-    required this.controller,
-  });
+  const HabbitStatsScreen({super.key, required this.habbitId});
 
   String _formatDate(DateTime date) {
     return '${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}.${date.year} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
   }
 
-  Habbit get _habbit => controller.getHabbit(habbitId: habbitId);
-
   @override
   Widget build(BuildContext context) {
+    var habbit = context.habbitsController.getHabbit(habbitId: habbitId);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Статистика привычки'),
@@ -42,7 +37,7 @@ class HabbitStatsScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      _habbit.name,
+                      habbit.name,
                       style: const TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
@@ -54,25 +49,25 @@ class HabbitStatsScreen extends StatelessWidget {
                       children: [
                         _buildStatItem(
                           'Цель',
-                          '${_habbit.targetDays} дней',
+                          '${habbit.targetDays} дней',
                           Icons.flag,
                           Colors.blue,
                         ),
                         _buildStatItem(
                           'Прогресс',
-                          '${_habbit.currentProgress}',
+                          '${habbit.currentProgress}',
                           Icons.trending_up,
                           Colors.green,
                         ),
                         _buildStatItem(
                           'Подтверждений',
-                          '${_habbit.currentAcks}',
+                          '${habbit.currentAcks}',
                           Icons.check_circle,
                           Colors.green,
                         ),
                         _buildStatItem(
                           'Срывов',
-                          '${_habbit.currentBreaks}',
+                          '${habbit.currentBreaks}',
                           Icons.cancel,
                           Colors.red,
                         ),
@@ -80,26 +75,28 @@ class HabbitStatsScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                     LinearProgressIndicator(
-                      value: _habbit.targetDays > 0
-                          ? (_habbit.currentProgress / _habbit.targetDays)
-                                .clamp(0.0, 1.0)
+                      value: habbit.targetDays > 0
+                          ? (habbit.currentProgress / habbit.targetDays).clamp(
+                              0.0,
+                              1.0,
+                            )
                           : 0.0,
                       minHeight: 8,
                       backgroundColor: Colors.grey[300],
                       valueColor: AlwaysStoppedAnimation<Color>(
-                        _habbit.isGoalReached ? Colors.green : Colors.blue,
+                        habbit.isGoalReached ? Colors.green : Colors.blue,
                       ),
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      _habbit.isGoalReached
+                      habbit.isGoalReached
                           ? 'Цель достигнута!'
-                          : '${((_habbit.currentProgress / _habbit.targetDays) * 100).toStringAsFixed(1)}% выполнено',
+                          : '${((habbit.currentProgress / habbit.targetDays) * 100).toStringAsFixed(1)}% выполнено',
                       style: TextStyle(
-                        color: _habbit.isGoalReached
+                        color: habbit.isGoalReached
                             ? Colors.green
                             : Colors.grey[600],
-                        fontWeight: _habbit.isGoalReached
+                        fontWeight: habbit.isGoalReached
                             ? FontWeight.bold
                             : FontWeight.normal,
                       ),
@@ -117,7 +114,7 @@ class HabbitStatsScreen extends StatelessWidget {
             const SizedBox(height: 8),
             // Список событий
             Expanded(
-              child: _habbit.events.isEmpty
+              child: habbit.events.isEmpty
                   ? Center(
                       child: Text(
                         'Пока нет событий',
@@ -125,10 +122,10 @@ class HabbitStatsScreen extends StatelessWidget {
                       ),
                     )
                   : ListView.builder(
-                      itemCount: _habbit.events.length,
+                      itemCount: habbit.events.length,
                       itemBuilder: (context, index) {
                         final event =
-                            _habbit.events[_habbit.events.length - 1 - index];
+                            habbit.events[habbit.events.length - 1 - index];
                         final isAck = event is Ack;
 
                         return Card(

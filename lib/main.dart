@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:practice2/features/state/habbits_container.dart';
-import 'package:practice2/features/widgets/habbits_controller.dart';
+import 'package:practice2/features/widgets/habbits_provider.dart';
 import 'package:practice2/router_config.dart';
 
 void main() {
@@ -14,13 +14,11 @@ void main() {
       };
     }(),
   );
-  runApp(MyApp(controller: container));
+  runApp(HabbitsProvider.wrap(controller: container, child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
-  final HabbitsController controller;
-
-  const MyApp({super.key, required this.controller});
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +28,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
       debugShowCheckedModeBanner: false,
-      routerConfig: buildRouter(controller),
+      routerConfig: buildRouter(),
     );
   }
 }

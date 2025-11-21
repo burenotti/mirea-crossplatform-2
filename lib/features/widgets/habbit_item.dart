@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:go_router/go_router.dart';
 import 'package:practice2/features/entities/habbit.dart';
-import 'package:practice2/features/screens/habbit_form_screen.dart';
-import 'package:practice2/features/screens/habbit_stats_screen.dart';
 import 'package:practice2/features/widgets/habbits_controller.dart';
 import 'package:practice2/router_config.dart';
 
