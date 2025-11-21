@@ -2,6 +2,9 @@ import 'package:flutter/foundation.dart';
 import 'package:practice2/features/entities/habbit.dart';
 import 'package:practice2/features/widgets/habbits_controller.dart';
 
+typedef HabbitIdGenerator = int Function();
+typedef CurrentDateTimeProvider = DateTime Function();
+
 class HabbitsContainer extends ChangeNotifier implements HabbitsController {
   List<Habbit> _habbits = [];
   final DateTime Function() currentDateTime;

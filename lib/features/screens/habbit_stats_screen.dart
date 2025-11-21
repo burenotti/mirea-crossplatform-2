@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:practice2/features/entities/habbit.dart';
-import 'package:practice2/features/widgets/habbits_provider.dart';
+import 'package:practice2/features/widgets/habbits_controller.dart';
 
 class HabbitStatsScreen extends StatelessWidget {
   final int habbitId;
@@ -14,7 +15,7 @@ class HabbitStatsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var habbit = context.habbitsController.getHabbit(habbitId: habbitId);
+    var habbit = GetIt.I.get<HabbitsController>().getHabbit(habbitId: habbitId);
 
     return Scaffold(
       appBar: AppBar(

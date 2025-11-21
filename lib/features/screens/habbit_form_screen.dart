@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:practice2/features/entities/habbit.dart';
-import 'package:practice2/features/widgets/habbits_provider.dart';
+import 'package:practice2/features/widgets/habbits_controller.dart';
 import 'package:practice2/router_config.dart';
 
 class HabbitFormScreen extends StatefulWidget {
@@ -57,7 +58,9 @@ class _HabbitFormScreenState extends State<HabbitFormScreen> {
 
   Habbit? get _editingHabbit => widget.editingHabbitId == null
       ? null
-      : context.habbitsController.getHabbit(habbitId: widget.editingHabbitId!);
+      : GetIt.I.get<HabbitsController>().getHabbit(
+          habbitId: widget.editingHabbitId!,
+        );
 
   void _updateFormState() {
     setState(() {});
@@ -66,13 +69,13 @@ class _HabbitFormScreenState extends State<HabbitFormScreen> {
   void _submitForm() {
     if (_isFormValid) {
       if (_editingHabbit == null) {
-        context.habbitsController.addHabbit(
+        GetIt.I.get<HabbitsController>().addHabbit(
           name: _nameController.text,
           iconUrl: _iconUrlController.text,
           targetDays: int.parse(_targetDaysController.text),
         );
       } else {
-        context.habbitsController.editHabbit(
+        GetIt.I.get<HabbitsController>().editHabbit(
           habbitId: _editingHabbit!.id,
           name: _nameController.text,
           iconUrl: _iconUrlController.text,
