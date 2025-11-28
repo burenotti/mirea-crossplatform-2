@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
-import 'package:practice2/features/entities/habbit.dart';
-import 'package:practice2/features/widgets/habbits_controller.dart';
+import 'package:practice2/features/bloc/habbits_form_cubit.dart';
+import 'package:practice2/features/widgets/habbits_store.dart';
 import 'package:practice2/router_config.dart';
 
 class HabbitFormScreen extends StatefulWidget {
@@ -15,134 +16,127 @@ class HabbitFormScreen extends StatefulWidget {
 }
 
 class _HabbitFormScreenState extends State<HabbitFormScreen> {
-  final _nameController = TextEditingController();
-  final _targetDaysController = TextEditingController();
-  final _iconUrlController = TextEditingController();
-  bool _isInitialized = false;
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _targetDaysController.dispose();
-    _iconUrlController.dispose();
-    super.dispose();
+  bool _isFormValid(HabitEditorState state) {
+    return state.name.isNotEmpty &&
+        state.iconUrl.isNotEmpty &&
+        state.targetDays > 0;
   }
 
-  bool get _isFormValid {
-    return _nameController.text.isNotEmpty &&
-        _iconUrlController.text.isNotEmpty &&
-        _targetDaysController.text.isNotEmpty &&
-        int.tryParse(_targetDaysController.text) != null &&
-        int.parse(_targetDaysController.text) > 0;
-  }
+  void _submitForm(BuildContext context) async {
+    final cubit = context.read<HabbitEditorCubit>();
+    final router = GoRouter.of(context);
 
-  @override
-  void initState() {
-    super.initState();
-    _nameController.addListener(_updateFormState);
-    _iconUrlController.addListener(_updateFormState);
-    _targetDaysController.addListener(_updateFormState);
-  }
+    await cubit.submit();
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!_isInitialized) {
-      _isInitialized = true;
-      final editingHabbit = _editingHabbit;
-      _nameController.text = editingHabbit?.name ?? "";
-      _iconUrlController.text = editingHabbit?.iconUrl ?? "";
-      _targetDaysController.text = editingHabbit?.targetDays.toString() ?? "";
-    }
-  }
+    if (!mounted) return;
 
-  Habbit? get _editingHabbit => widget.editingHabbitId == null
-      ? null
-      : GetIt.I.get<HabbitsController>().getHabbit(
-          habbitId: widget.editingHabbitId!,
-        );
-
-  void _updateFormState() {
-    setState(() {});
-  }
-
-  void _submitForm() {
-    if (_isFormValid) {
-      if (_editingHabbit == null) {
-        GetIt.I.get<HabbitsController>().addHabbit(
-          name: _nameController.text,
-          iconUrl: _iconUrlController.text,
-          targetDays: int.parse(_targetDaysController.text),
-        );
-      } else {
-        GetIt.I.get<HabbitsController>().editHabbit(
-          habbitId: _editingHabbit!.id,
-          name: _nameController.text,
-          iconUrl: _iconUrlController.text,
-          targetDays: int.parse(_targetDaysController.text),
-        );
-      }
-      context.goNamed(Routes.habbitsList);
+    final state = cubit.state;
+    if (state.error == null && !state.submitting) {
+      router.goNamed(Routes.habbitsList);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text("Добавление привычки"),
-        leading: IconButton(
-          onPressed: () => context.pop(),
-          icon: const Icon(Icons.arrow_back),
-        ),
-        actions: [
-          IconButton(
-            onPressed: _isFormValid ? _submitForm : null,
-            icon: const Icon(Icons.done),
-          ),
-        ],
+    final store = GetIt.I.get<HabbitsStore>();
+    final editingHabbit = widget.editingHabbitId != null
+        ? store.getHabbit(habbitId: widget.editingHabbitId!)
+        : null;
+
+    return BlocProvider(
+      create: (context) => HabbitEditorCubit(
+        store,
+        habitId: widget.editingHabbitId,
+        initial: editingHabbit,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Название привычки
-            TextField(
-              controller: _nameController,
-              decoration: const InputDecoration(
-                labelText: 'Название привычки',
-                hintText: 'Например: Пробежка',
-                border: OutlineInputBorder(),
+      child: BlocBuilder<HabbitEditorCubit, HabitEditorState>(
+        builder: (context, state) {
+          return Scaffold(
+            appBar: AppBar(
+              backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+              title: Text(editingHabbit == null
+                  ? "Добавление привычки"
+                  : "Редактирование привычки"),
+              leading: IconButton(
+                onPressed: () => context.pop(),
+                icon: const Icon(Icons.arrow_back),
               ),
+              actions: [
+                IconButton(
+                  onPressed: _isFormValid(state) ? () => _submitForm(context) : null,
+                  icon: state.submitting
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.done),
+                ),
+              ],
             ),
-            const SizedBox(height: 24),
+            body: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (state.error != null)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 16.0),
+                      child: Text(
+                        state.error!,
+                        style: TextStyle(color: Theme.of(context).colorScheme.error),
+                      ),
+                    ),
 
-            // URL иконки
-            TextField(
-              controller: _iconUrlController,
-              decoration: const InputDecoration(
-                labelText: 'URL иконки',
-                hintText: 'Например: https://example.com/icon.png',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 24),
+                  // Название привычки
+                  TextField(
+                    onChanged: (value) => context.read<HabbitEditorCubit>().nameChanged(value),
+                    decoration: const InputDecoration(
+                      labelText: 'Название привычки',
+                      hintText: 'Например: Пробежка',
+                      border: OutlineInputBorder(),
+                    ),
+                    controller: TextEditingController(text: state.name)
+                      ..selection = TextSelection.collapsed(offset: state.name.length),
+                  ),
+                  const SizedBox(height: 24),
 
-            // Целевое количество дней
-            TextField(
-              controller: _targetDaysController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 'Целевое количество дней',
-                hintText: 'Например: 30',
-                border: OutlineInputBorder(),
-                suffixText: 'дней',
+                  // URL иконки
+                  TextField(
+                    onChanged: (value) => context.read<HabbitEditorCubit>().iconChanged(value),
+                    decoration: const InputDecoration(
+                      labelText: 'URL иконки',
+                      hintText: 'Например: https://example.com/icon.png',
+                      border: OutlineInputBorder(),
+                    ),
+                    controller: TextEditingController(text: state.iconUrl)
+                      ..selection = TextSelection.collapsed(offset: state.iconUrl.length),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Целевое количество дней
+                  TextField(
+                    onChanged: (value) {
+                      final parsed = int.tryParse(value);
+                      if (parsed != null) {
+                        context.read<HabbitEditorCubit>().targetChanged(parsed);
+                      }
+                    },
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      labelText: 'Целевое количество дней',
+                      hintText: 'Например: 30',
+                      border: OutlineInputBorder(),
+                      suffixText: 'дней',
+                    ),
+                    controller: TextEditingController(text: state.targetDays.toString())
+                      ..selection = TextSelection.collapsed(offset: state.targetDays.toString().length),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }

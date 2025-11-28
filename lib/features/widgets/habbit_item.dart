@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:go_router/go_router.dart';
+import 'package:practice2/features/bloc/habbits_list/habbits_bloc.dart';
+import 'package:practice2/features/bloc/habbits_list/habbits_event.dart';
 import 'package:practice2/features/entities/habbit.dart';
-import 'package:practice2/features/widgets/habbits_controller.dart';
 import 'package:practice2/router_config.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class HabbitItem extends StatelessWidget {
   final Habbit habbit;
-  final HabbitsController controller;
 
-  const HabbitItem({super.key, required this.habbit, required this.controller});
+  const HabbitItem({super.key, required this.habbit});
 
   @override
   Widget build(BuildContext context) {
@@ -108,9 +109,10 @@ class HabbitItem extends StatelessWidget {
                     color: Colors.red,
                     onPressed: habbit.isGoalReached
                         ? null
-                        : () {
-                            controller.breakHabbit(habbitId: habbit.id);
-                          },
+                        : () => context.read<HabbitsBloc>().add(
+                            HabbitBreaked(habbitId: habbit.id),
+                          ),
+
                     tooltip: 'Срыв',
                   ),
                   const SizedBox(height: 4),
@@ -120,9 +122,9 @@ class HabbitItem extends StatelessWidget {
                     color: Colors.green,
                     onPressed: habbit.isGoalReached
                         ? null
-                        : () {
-                            controller.ackHabbit(habbitId: habbit.id);
-                          },
+                        : () => context.read<HabbitsBloc>().add(
+                            HabbitAcked(habbitId: habbit.id),
+                          ),
                     tooltip: 'Подтвердить',
                   ),
                 ],

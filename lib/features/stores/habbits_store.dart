@@ -1,16 +1,27 @@
-import 'package:flutter/foundation.dart';
+import 'dart:async';
+
 import 'package:practice2/features/entities/habbit.dart';
-import 'package:practice2/features/widgets/habbits_controller.dart';
+import 'package:practice2/features/widgets/habbits_store.dart';
 
 typedef HabbitIdGenerator = int Function();
 typedef CurrentDateTimeProvider = DateTime Function();
 
-class HabbitsContainer extends ChangeNotifier implements HabbitsController {
+class HabbitsStoreImpl implements HabbitsStore {
   List<Habbit> _habbits = [];
   final DateTime Function() currentDateTime;
   final int Function() nextHabbitId;
+  final _controller = StreamController<List<Habbit>>.broadcast();
 
-  HabbitsContainer({required this.currentDateTime, required this.nextHabbitId});
+  HabbitsStoreImpl({required this.currentDateTime, required this.nextHabbitId});
+
+  @override
+  Stream<List<Habbit>> watchHabbits() async* {
+    yield List.unmodifiable(_habbits);
+
+    await for (final habbits in _controller.stream) {
+      yield habbits;
+    }
+  }
 
   @override
   void addHabbit({
@@ -18,29 +29,25 @@ class HabbitsContainer extends ChangeNotifier implements HabbitsController {
     required String iconUrl,
     required int targetDays,
   }) {
-    _habbits.add(
-      Habbit(
-        id: nextHabbitId(),
-        name: name,
-        createdAt: currentDateTime(),
-        iconUrl: iconUrl,
-        targetDays: targetDays,
-      ),
+    var newHabbit = Habbit(
+      id: nextHabbitId(),
+      name: name,
+      createdAt: currentDateTime(),
+      iconUrl: iconUrl,
+      targetDays: targetDays,
     );
-    notifyListeners();
+
+    _emit([..._habbits, newHabbit]);
   }
 
   @override
   void ackHabbit({required int habbitId}) {
-    _exchange(
-      habbitId: habbitId,
-      mutation: (h) => h.withAck(currentDateTime()),
-    );
+    _modify(habbitId: habbitId, mutation: (h) => h.withAck(currentDateTime()));
   }
 
   @override
   void breakHabbit({required int habbitId}) {
-    _exchange(
+    _modify(
       habbitId: habbitId,
       mutation: (h) => h.withBreak(currentDateTime()),
     );
@@ -48,17 +55,22 @@ class HabbitsContainer extends ChangeNotifier implements HabbitsController {
 
   @override
   void removeHabbit({required int habbitId}) {
-    _habbits = _habbits.where((h) => h.id != habbitId).toList();
-    notifyListeners();
+    _emit(_habbits.where((h) => h.id != habbitId).toList());
   }
 
-  void _exchange({
+  void _modify({
     required int habbitId,
     required Habbit Function(Habbit) mutation,
   }) {
     var index = _habbits.indexWhere((h) => h.id == habbitId);
-    _habbits[index] = mutation(_habbits[index]);
-    notifyListeners();
+    var next = List<Habbit>.from(_habbits);
+    next[index] = mutation(_habbits[index]);
+    _emit(next);
+  }
+
+  void _emit(List<Habbit> next) {
+    _habbits = next;
+    _controller.add(List.unmodifiable(_habbits));
   }
 
   @override
@@ -71,7 +83,7 @@ class HabbitsContainer extends ChangeNotifier implements HabbitsController {
     required String iconUrl,
     required int targetDays,
   }) {
-    _exchange(
+    _modify(
       habbitId: habbitId,
       mutation: (h) =>
           h.withName(name).withTargetDays(targetDays).withIconUrl(iconUrl),

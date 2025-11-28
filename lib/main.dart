@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'package:practice2/features/state/habbits_container.dart';
-import 'package:practice2/features/widgets/habbits_controller.dart';
+import 'package:practice2/features/stores/habbits_store.dart';
+import 'package:practice2/features/widgets/habbits_store.dart';
 import 'package:practice2/router_config.dart';
 
 void main() {
@@ -14,8 +14,8 @@ void main() {
   }());
   GetIt.I.registerSingleton<CurrentDateTimeProvider>(() => DateTime.now());
 
-  GetIt.I.registerLazySingleton<HabbitsController>(
-    () => HabbitsContainer(
+  GetIt.I.registerLazySingleton<HabbitsStore>(
+    () => HabbitsStoreImpl(
       currentDateTime: GetIt.I.get<CurrentDateTimeProvider>(),
       nextHabbitId: GetIt.I.get<HabbitIdGenerator>(),
     ),

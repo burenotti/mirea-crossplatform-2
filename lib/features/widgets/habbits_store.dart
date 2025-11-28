@@ -1,7 +1,6 @@
-import 'package:flutter/widgets.dart';
 import 'package:practice2/features/entities/habbit.dart';
 
-abstract interface class HabbitsController implements ChangeNotifier {
+abstract interface class HabbitsStore {
   void ackHabbit({required int habbitId});
   void breakHabbit({required int habbitId});
   void removeHabbit({required int habbitId});
@@ -18,4 +17,5 @@ abstract interface class HabbitsController implements ChangeNotifier {
     required int targetDays,
   });
   Habbit getHabbit({required int habbitId});
+  Stream<List<Habbit>> watchHabbits();
 }
