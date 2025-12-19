@@ -14,6 +14,7 @@ class Break extends HabbitAction {
 
 class Habbit {
   final int id;
+  final String userId;
   final String name;
   final String iconUrl;
   final DateTime createdAt;
@@ -22,6 +23,7 @@ class Habbit {
 
   factory Habbit({
     required int id,
+    required String userId,
     required String name,
     required String iconUrl,
     required DateTime createdAt,
@@ -29,6 +31,7 @@ class Habbit {
   }) {
     return Habbit._(
       id: id,
+      userId: userId,
       name: name,
       iconUrl: iconUrl,
       createdAt: createdAt,
@@ -39,6 +42,7 @@ class Habbit {
 
   const Habbit._({
     required this.id,
+    required this.userId,
     required this.name,
     required this.iconUrl,
     required this.createdAt,
@@ -67,6 +71,7 @@ class Habbit {
   }) {
     return Habbit._(
       id: id,
+      userId: userId,
       name: name ?? this.name,
       iconUrl: iconUrl ?? this.iconUrl,
       createdAt: createdAt ?? this.createdAt,

@@ -1,6 +1,8 @@
 import 'dart:async';
 
+import 'package:get_it/get_it.dart';
 import 'package:practice2/features/entities/habbit.dart';
+import 'package:practice2/features/stores/auth_store.dart';
 import 'package:practice2/features/widgets/habbits_store.dart';
 
 typedef HabbitIdGenerator = int Function();
@@ -14,9 +16,17 @@ class HabbitsStoreImpl implements HabbitsStore {
 
   HabbitsStoreImpl({required this.currentDateTime, required this.nextHabbitId});
 
+  AuthStore get _authStore => GetIt.I.get<AuthStore>();
+
+  List<Habbit> get _userHabbits {
+    final userId = _authStore.currentUser?.id;
+    if (userId == null) return [];
+    return _habbits.where((h) => h.userId == userId).toList();
+  }
+
   @override
   Stream<List<Habbit>> watchHabbits() async* {
-    yield List.unmodifiable(_habbits);
+    yield List.unmodifiable(_userHabbits);
 
     await for (final habbits in _controller.stream) {
       yield habbits;
@@ -29,8 +39,14 @@ class HabbitsStoreImpl implements HabbitsStore {
     required String iconUrl,
     required int targetDays,
   }) {
+    final userId = _authStore.currentUser?.id;
+    if (userId == null) {
+      throw Exception('User must be authenticated to add a habbit');
+    }
+
     var newHabbit = Habbit(
       id: nextHabbitId(),
+      userId: userId,
       name: name,
       createdAt: currentDateTime(),
       iconUrl: iconUrl,
@@ -70,11 +86,11 @@ class HabbitsStoreImpl implements HabbitsStore {
 
   void _emit(List<Habbit> next) {
     _habbits = next;
-    _controller.add(List.unmodifiable(_habbits));
+    _controller.add(List.unmodifiable(_userHabbits));
   }
 
   @override
-  List<Habbit> get habbits => List.unmodifiable(_habbits);
+  List<Habbit> get habbits => List.unmodifiable(_userHabbits);
 
   @override
   void editHabbit({

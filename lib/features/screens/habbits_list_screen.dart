@@ -1,4 +1,3 @@
-import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
@@ -20,6 +19,13 @@ class HabbitsListScreen extends StatelessWidget {
         appBar: AppBar(
           backgroundColor: Theme.of(context).colorScheme.inversePrimary,
           title: Text("Привычки"),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.person),
+              tooltip: 'Profile',
+              onPressed: () => context.pushNamed(Routes.profile),
+            ),
+          ],
         ),
         body: HabbitsList(),
         floatingActionButton: FloatingActionButton(
