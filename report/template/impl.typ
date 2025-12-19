@@ -155,43 +155,43 @@
   body,
 ) = {
   let completion_text = "Cтуденты группы"
-  
+
   if authors.len() > 1 {
     completion_text = "Cтуденты группы"
   }
-  
+
   // Set the document's basic properties.
   set document(author: authors, title: title)
   set page(
     margin: (left: 25mm, right: 15mm, top: 20mm, bottom: 20mm),
     number-align: center,
   )
-  
-  
+
+
   set text(font: "Times New Roman", lang: "ru")
-  
+
   set heading(numbering: "1.1")
   set par(leading: 0.75em)
-  
-  
+
+
   set align(center)
   set par(spacing: 2mm)
-  
+
   image("./logo_monochrome.png", width: 20mm)
-  
+
   [
     #upper("Минобрнауки России\n")
     Федеральное государственное бюджетное образовательное учреждение
-    
+
     высшего образования
-    
+
     *"МИРЭА -- Российский технологический университет"*
-    
+
     #text(size: 1.2em, [*РТУ МИРЭА*])
   ]
-  
+
   line(length: 100%, stroke: (paint: black, thickness: 2pt))
-  
+
   set text(14pt)
   [
     Институт информационных технологий
@@ -199,18 +199,18 @@
     Кафедра #lower(department)
     #v(20mm)
     #text(16pt, [*#title*])
-    
+
     по дисциплине "#course"
-    
+
     #v(5mm)
     #if theme != "" {
       [Тема: "#theme"]
     }
-    
+
     #v(50mm)
     #set text(12pt)
     #set align(start)
-    
+
     *Выполнили:*
 
     #grid(
@@ -225,25 +225,24 @@
       grid.cell([Старший преподаватель кафедры МОСИТ]),
       grid.cell([
         #align(right, [#lecturer])
-      ]
-      )
+      ]),
     )
-    
+
     #v(45mm)
   ]
-  
+
   v(13mm)
   align(center)[Москва #date.year()]
   pagebreak()
-  
-  
+
+
   // Main body.
-  
+
   set text(size: 14pt)
   set align(start)
-  
+
   set text(hyphenate: false)
-  
+
   set heading(numbering: "1.")
   show heading.where(level: 1): it => text(size: 16pt, it.body)
   show heading.where(level: 2): it => text(size: 14pt, align(left, it.body))
@@ -251,18 +250,18 @@
   show heading.where(level: 4): it => text(14pt, it)
   show heading.where(level: 5): it => text(14pt, it)
   show heading.where(level: 6): it => text(14pt, it)
-  
+
   show figure: set block(breakable: true)
   set figure.caption(separator: [ --- ])
-  
+
   show figure.where(kind: "table"): figure => {
     figure.body
   }
-  
+
   show figure.where(kind: "listing"): figure => {
     figure.body
   }
-  
+
   show figure.where(kind: "picture"): it => {
     block(
       inset: (left: -13mm),
@@ -275,7 +274,7 @@
       #text(size: 12pt, it.caption)
     ]
   }
-  
+
   if add_toc {
     set par(
       leading: 5mm,
@@ -284,9 +283,9 @@
     outline(depth: 3, indent: 0em)
     pagebreak()
   }
-  
+
   set page(numbering: "1")
-  
+
   // first-line-indent не работает для первого параграфа,
   // поэтому здесь этот костыль
   set page(margin: (left: 39mm))
@@ -296,6 +295,6 @@
     leading: 5mm,
     hanging-indent: -13mm,
   )
-  
+
   body
 }
