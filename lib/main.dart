@@ -1,11 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
+import 'package:practice2/features/blocs/achievements/achievements_bloc.dart';
+import 'package:practice2/features/blocs/achievements/achievements_event.dart';
 import 'package:practice2/features/blocs/articles/articles_bloc.dart';
 import 'package:practice2/features/blocs/articles/articles_event.dart';
 import 'package:practice2/features/blocs/settings/settings_bloc.dart';
 import 'package:practice2/features/blocs/settings/settings_event.dart';
 import 'package:practice2/features/blocs/settings/settings_state.dart';
+import 'package:practice2/features/widgets/achievement_notification_listener.dart';
+import 'package:practice2/features/stores/actions_store.dart';
+import 'package:practice2/features/stores/actions_store_impl.dart';
+import 'package:practice2/features/stores/achievements_store.dart';
+import 'package:practice2/features/stores/achievements_store_impl.dart';
 import 'package:practice2/features/stores/articles_store.dart';
 import 'package:practice2/features/stores/articles_store_impl.dart';
 import 'package:practice2/features/stores/auth_store.dart';
@@ -44,6 +51,11 @@ void main() {
 
   GetIt.I.registerSingleton<CurrentDateTimeProvider>(() => DateTime.now());
 
+  // Регистрируем ActionsStore первым, так как от него зависят другие сторы
+  GetIt.I.registerLazySingleton<ActionsStore>(
+    () => ActionsStoreImpl(),
+  );
+
   GetIt.I.registerLazySingleton<AuthStore>(
     () => AuthStoreImpl(),
   );
@@ -52,6 +64,7 @@ void main() {
     () => HabbitsStoreImpl(
       currentDateTime: GetIt.I.get<CurrentDateTimeProvider>(),
       nextHabbitId: GetIt.I.get<HabbitIdGenerator>(),
+      actionsStore: GetIt.I.get<ActionsStore>(),
     ),
   );
 
@@ -63,6 +76,7 @@ void main() {
     () => SupportStoreImpl(
       nextMessageId: GetIt.I.get<MessageIdGenerator>(instanceName: 'messageIdGenerator'),
       currentDateTime: GetIt.I.get<CurrentDateTimeProvider>(),
+      actionsStore: GetIt.I.get<ActionsStore>(),
     ),
   );
 
@@ -71,7 +85,16 @@ void main() {
   );
 
   GetIt.I.registerLazySingleton<SettingsStore>(
-    () => SettingsStoreImpl(),
+    () => SettingsStoreImpl(
+      actionsStore: GetIt.I.get<ActionsStore>(),
+    ),
+  );
+
+  // Регистрируем AchievementsStore, который подписывается на ActionsStore
+  GetIt.I.registerLazySingleton<AchievementsStore>(
+    () => AchievementsStoreImpl(
+      actionsStore: GetIt.I.get<ActionsStore>(),
+    ),
   );
 
   runApp(MyApp());
@@ -94,6 +117,11 @@ class MyApp extends StatelessWidget {
             settingsStore: GetIt.I.get<SettingsStore>(),
           )..add(LoadSettings()),
         ),
+        BlocProvider(
+          create: (context) => AchievementsBloc(
+            achievementsStore: GetIt.I.get<AchievementsStore>(),
+          )..add(LoadAchievements()),
+        ),
       ],
       child: BlocBuilder<SettingsBloc, SettingsState>(
         builder: (context, state) {
@@ -115,6 +143,11 @@ class MyApp extends StatelessWidget {
             themeMode: themeMode,
             debugShowCheckedModeBanner: false,
             routerConfig: buildRouter(),
+            builder: (context, child) {
+              return AchievementNotificationListener(
+                child: child ?? const SizedBox(),
+              );
+            },
           );
         },
       ),

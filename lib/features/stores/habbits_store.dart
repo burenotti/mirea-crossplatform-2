@@ -1,7 +1,9 @@
 import 'dart:async';
 
 import 'package:get_it/get_it.dart';
+import 'package:practice2/features/entities/app_action.dart';
 import 'package:practice2/features/entities/habbit.dart';
+import 'package:practice2/features/stores/actions_store.dart';
 import 'package:practice2/features/stores/auth_store.dart';
 import 'package:practice2/features/widgets/habbits_store.dart';
 
@@ -12,9 +14,14 @@ class HabbitsStoreImpl implements HabbitsStore {
   List<Habbit> _habbits = [];
   final DateTime Function() currentDateTime;
   final int Function() nextHabbitId;
+  final ActionsStore actionsStore;
   final _controller = StreamController<List<Habbit>>.broadcast();
 
-  HabbitsStoreImpl({required this.currentDateTime, required this.nextHabbitId});
+  HabbitsStoreImpl({
+    required this.currentDateTime,
+    required this.nextHabbitId,
+    required this.actionsStore,
+  });
 
   AuthStore get _authStore => GetIt.I.get<AuthStore>();
 
@@ -44,21 +51,38 @@ class HabbitsStoreImpl implements HabbitsStore {
       throw Exception('User must be authenticated to add a habbit');
     }
 
+    final now = currentDateTime();
     var newHabbit = Habbit(
       id: nextHabbitId(),
       userId: userId,
       name: name,
-      createdAt: currentDateTime(),
+      createdAt: now,
       iconUrl: iconUrl,
       targetDays: targetDays,
     );
 
     _emit([..._habbits, newHabbit]);
+
+    // Отправляем событие о создании привычки
+    actionsStore.dispatch(AppAction(
+      type: ActionType.habbitCreated,
+      timestamp: now,
+      data: {'habbitId': newHabbit.id},
+    ));
   }
 
   @override
   void ackHabbit({required int habbitId}) {
-    _modify(habbitId: habbitId, mutation: (h) => h.withAck(currentDateTime()));
+    final now = currentDateTime();
+
+    _modify(habbitId: habbitId, mutation: (h) => h.withAck(now));
+
+    // Отправляем событие о выполнении привычки
+    actionsStore.dispatch(AppAction(
+      type: ActionType.habbitAcked,
+      timestamp: now,
+      data: {'habbitId': habbitId},
+    ));
   }
 
   @override
@@ -72,6 +96,13 @@ class HabbitsStoreImpl implements HabbitsStore {
   @override
   void removeHabbit({required int habbitId}) {
     _emit(_habbits.where((h) => h.id != habbitId).toList());
+
+    // Отправляем событие об удалении привычки
+    actionsStore.dispatch(AppAction(
+      type: ActionType.habbitDeleted,
+      timestamp: currentDateTime(),
+      data: {'habbitId': habbitId},
+    ));
   }
 
   void _modify({

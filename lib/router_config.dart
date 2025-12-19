@@ -6,6 +6,7 @@ import 'package:practice2/features/screens/habbit_form_screen.dart';
 import 'package:practice2/features/screens/habbit_stats_screen.dart';
 import 'package:practice2/features/screens/habbits_list_screen.dart';
 import 'package:practice2/features/screens/profile_screen.dart';
+import 'package:practice2/features/screens/achievements_screen.dart';
 import 'package:practice2/features/screens/articles/articles_list_screen.dart';
 import 'package:practice2/features/screens/faq_screen.dart';
 import 'package:practice2/features/screens/settings_screen.dart';
@@ -21,6 +22,7 @@ final class Routes {
   static const habbitStats = 'habbitStats';
   static const habbitEdit = 'habbitEdit';
   static const articlesList = 'articlesList';
+  static const achievements = 'achievements';
   static const faq = 'faq';
   static const support = 'support';
   static const settings = 'settings';
@@ -94,6 +96,11 @@ GoRouter buildRouter() {
         path: '/articles',
         name: Routes.articlesList,
         builder: (context, state) => const ArticlesListScreen(),
+      ),
+      GoRoute(
+        path: '/achievements',
+        name: Routes.achievements,
+        builder: (context, state) => const AchievementsScreen(),
       ),
       GoRoute(
         path: '/faq',

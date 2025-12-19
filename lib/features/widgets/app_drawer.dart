@@ -51,6 +51,14 @@ class AppDrawer extends StatelessWidget {
             },
           ),
           ListTile(
+            leading: const Icon(Icons.emoji_events),
+            title: const Text('Достижения'),
+            onTap: () {
+              Navigator.pop(context);
+              context.go('/achievements');
+            },
+          ),
+          ListTile(
             leading: const Icon(Icons.person),
             title: const Text('Профиль'),
             onTap: () {
