@@ -6,6 +6,7 @@ import 'package:practice2/features/screens/habbit_form_screen.dart';
 import 'package:practice2/features/screens/habbit_stats_screen.dart';
 import 'package:practice2/features/screens/habbits_list_screen.dart';
 import 'package:practice2/features/screens/profile_screen.dart';
+import 'package:practice2/features/screens/articles/articles_list_screen.dart';
 import 'package:practice2/features/stores/auth_store.dart';
 
 final class Routes {
@@ -16,6 +17,7 @@ final class Routes {
   static const habbitAdd = 'habbitAdd';
   static const habbitStats = 'habbitStats';
   static const habbitEdit = 'habbitEdit';
+  static const articlesList = 'articlesList';
 }
 
 GoRouter buildRouter() {
@@ -81,6 +83,11 @@ GoRouter buildRouter() {
             ),
           ),
         ],
+      ),
+      GoRoute(
+        path: '/articles',
+        name: Routes.articlesList,
+        builder: (context, state) => const ArticlesListScreen(),
       ),
     ],
   );

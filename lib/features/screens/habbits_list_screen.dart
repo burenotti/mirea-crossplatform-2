@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:practice2/features/bloc/habbits_list/habbits_bloc.dart';
 import 'package:practice2/features/widgets/habbits_store.dart';
 import 'package:practice2/features/widgets/habbits_list.dart';
+import 'package:practice2/features/widgets/app_drawer.dart';
 import 'package:practice2/router_config.dart';
 
 class HabbitsListScreen extends StatelessWidget {
@@ -27,6 +28,7 @@ class HabbitsListScreen extends StatelessWidget {
             ),
           ],
         ),
+        drawer: const AppDrawer(),
         body: HabbitsList(),
         floatingActionButton: FloatingActionButton(
           onPressed: () => context.pushNamed(Routes.habbitAdd),

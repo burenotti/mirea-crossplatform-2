@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
+import 'package:practice2/features/blocs/articles/articles_bloc.dart';
+import 'package:practice2/features/blocs/articles/articles_event.dart';
 import 'package:practice2/features/stores/auth_store.dart';
 import 'package:practice2/features/stores/auth_store_impl.dart';
 import 'package:practice2/features/stores/habbits_store.dart';
@@ -34,13 +37,16 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+    return BlocProvider(
+      create: (context) => ArticlesBloc()..add(LoadArticles()),
+      child: MaterialApp.router(
+        title: 'Flutter Demo',
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        ),
+        debugShowCheckedModeBanner: false,
+        routerConfig: buildRouter(),
       ),
-      debugShowCheckedModeBanner: false,
-      routerConfig: buildRouter(),
     );
   }
 }
