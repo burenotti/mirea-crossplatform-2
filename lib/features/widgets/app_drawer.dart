@@ -58,6 +58,22 @@ class AppDrawer extends StatelessWidget {
               context.go('/profile');
             },
           ),
+          ListTile(
+            leading: const Icon(Icons.help_outline),
+            title: const Text('FAQ'),
+            onTap: () {
+              Navigator.pop(context);
+              context.go('/faq');
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.support_agent),
+            title: const Text('Поддержка'),
+            onTap: () {
+              Navigator.pop(context);
+              context.go('/support');
+            },
+          ),
           const Divider(),
           ListTile(
             leading: const Icon(Icons.logout),
