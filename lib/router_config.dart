@@ -8,6 +8,7 @@ import 'package:practice2/features/screens/habbits_list_screen.dart';
 import 'package:practice2/features/screens/profile_screen.dart';
 import 'package:practice2/features/screens/articles/articles_list_screen.dart';
 import 'package:practice2/features/screens/faq_screen.dart';
+import 'package:practice2/features/screens/settings_screen.dart';
 import 'package:practice2/features/screens/support_chat_screen.dart';
 import 'package:practice2/features/stores/auth_store.dart';
 
@@ -22,6 +23,7 @@ final class Routes {
   static const articlesList = 'articlesList';
   static const faq = 'faq';
   static const support = 'support';
+  static const settings = 'settings';
 }
 
 GoRouter buildRouter() {
@@ -102,6 +104,11 @@ GoRouter buildRouter() {
         path: '/support',
         name: Routes.support,
         builder: (context, state) => const SupportChatScreen(),
+      ),
+      GoRoute(
+        path: '/settings',
+        name: Routes.settings,
+        builder: (context, state) => const SettingsScreen(),
       ),
     ],
   );

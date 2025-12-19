@@ -3,6 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:practice2/features/blocs/articles/articles_bloc.dart';
 import 'package:practice2/features/blocs/articles/articles_event.dart';
+import 'package:practice2/features/blocs/settings/settings_bloc.dart';
+import 'package:practice2/features/blocs/settings/settings_event.dart';
+import 'package:practice2/features/blocs/settings/settings_state.dart';
 import 'package:practice2/features/stores/articles_store.dart';
 import 'package:practice2/features/stores/articles_store_impl.dart';
 import 'package:practice2/features/stores/auth_store.dart';
@@ -10,6 +13,8 @@ import 'package:practice2/features/stores/auth_store_impl.dart';
 import 'package:practice2/features/stores/faq_store.dart';
 import 'package:practice2/features/stores/faq_store_impl.dart';
 import 'package:practice2/features/stores/habbits_store.dart';
+import 'package:practice2/features/stores/settings_store.dart';
+import 'package:practice2/features/stores/settings_store_impl.dart';
 import 'package:practice2/features/stores/support_store.dart';
 import 'package:practice2/features/stores/support_store_impl.dart';
 import 'package:practice2/features/widgets/habbits_store.dart';
@@ -65,6 +70,10 @@ void main() {
     () => FaqStoreImpl(),
   );
 
+  GetIt.I.registerLazySingleton<SettingsStore>(
+    () => SettingsStoreImpl(),
+  );
+
   runApp(MyApp());
 }
 
@@ -73,17 +82,41 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => ArticlesBloc(
-        articlesStore: GetIt.I.get<ArticlesStore>(),
-      )..add(LoadArticles()),
-      child: MaterialApp.router(
-        title: 'Flutter Demo',
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) => ArticlesBloc(
+            articlesStore: GetIt.I.get<ArticlesStore>(),
+          )..add(LoadArticles()),
         ),
-        debugShowCheckedModeBanner: false,
-        routerConfig: buildRouter(),
+        BlocProvider(
+          create: (context) => SettingsBloc(
+            settingsStore: GetIt.I.get<SettingsStore>(),
+          )..add(LoadSettings()),
+        ),
+      ],
+      child: BlocBuilder<SettingsBloc, SettingsState>(
+        builder: (context, state) {
+          final themeMode = state is SettingsLoaded ? state.themeMode : ThemeMode.system;
+
+          return MaterialApp.router(
+            title: 'Flutter Demo',
+            theme: ThemeData(
+              colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+              useMaterial3: true,
+            ),
+            darkTheme: ThemeData(
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: Colors.deepPurple,
+                brightness: Brightness.dark,
+              ),
+              useMaterial3: true,
+            ),
+            themeMode: themeMode,
+            debugShowCheckedModeBanner: false,
+            routerConfig: buildRouter(),
+          );
+        },
       ),
     );
   }
